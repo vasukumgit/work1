@@ -21,19 +21,41 @@ public class CurrencyRateAPI {
     private static final Logger logger = LoggerFactory.getLogger(CurrencyRateAPI.class);
 
     public String getApiKeyService() {
-        Properties properties = new Properties();
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("config.properties")) {
-            if (input == null) {
-                logger.error("Unable to find config.properties");
-                return null;
-            }
-            properties.load(input);
-            return properties.getProperty("API_KEY");
-        } catch (IOException e) {
-            logger.error("Error loading config.properties", e);
+
+    // First try environment variable
+    String apiKey = System.getenv("EXCHANGE_RATE_API_KEY");
+
+    if (apiKey != null && !apiKey.isBlank()) {
+        return apiKey;
+    }
+
+    // Fallback to config.properties
+    Properties properties = new Properties();
+
+    try (InputStream input =
+                 getClass().getClassLoader()
+                         .getResourceAsStream("config.properties")) {
+
+        if (input == null) {
+            logger.error("Unable to find config.properties");
             return null;
         }
+
+        properties.load(input);
+
+        apiKey = properties.getProperty("API_KEY");
+
+        if (apiKey != null) {
+            apiKey = apiKey.trim();
+        }
+
+        return apiKey;
+
+    } catch (IOException e) {
+        logger.error("Error loading config.properties", e);
+        return null;
     }
+}
 
     public String getURL() {
         return "https://v6.exchangerate-api.com/v6/" + getApiKeyService();

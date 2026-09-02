@@ -37,3 +37,7 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
+
+# Application secrets
+src/main/resources/config.properties
+
